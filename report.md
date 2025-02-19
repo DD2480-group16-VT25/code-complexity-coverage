@@ -66,6 +66,14 @@ Currently chosen project.
 ## Refactoring
 
 Plan for refactoring complex code:
+  * **_process_spider_output:** This Method could be refactored in order to reduce its CC and improve readability. For example the logic for chosing the method and determining if an upgrade or downgrade is needed could be moved to a separate method. This would reduce the CC of the Method by 4 and and would also make the methods more manageble. 
+
+   * **_get_serialized_fields:** By moving the logic for retriving the field iterator to a new method. The CC of this Method could be reduced by 4.
+
+   * **_get_inputs:** For this method the logic for extracting values from the inputs could be moved to a new method which would reduce the CC of the _get_inputs method by 3.
+
+
+
 
 Estimated impact of refactoring (lower CC, but other drawbacks?).
 
@@ -79,7 +87,7 @@ git diff ...
 
 Document your experience in using a "new"/different coverage tool.
 
-How well was the tool documented? Was it possible/easy/difficult to◊
+How well was the tool documented? Was it possible/easy/difficult to
 integrate it with your build environment?
 
 ### Your own coverage tool
@@ -105,6 +113,12 @@ its output?
 
 ## Coverage improvement
 
+Command to get branch coverage using their `tox` tool:
+
+```bash
+$env:COV_ARGS="--branch"; tox -e py -- tests
+```
+
 ###### _process_spider_output
 
 Old coverage: 100%, 24 branches. Higher than rest of code.
@@ -122,6 +136,17 @@ New coverage: ...
 Old coverage: 100%, 16 branches. Higher than rest of code.
 
 New coverage: ...
+
+_next_request@167-207@scrapy/core/engine.py - coverage 94%, CCN 13
+run@70-110@scrapy/commands/check.py - coverage 96%, CCN 13
+_parse_sitemap@69-95@scrapy/spiders/sitemap.py - coverage 82%, CCN 12
+_cb_bodyready@465-552@scrapy/core/downloader/handlers/http11.py - coverage 94%, CCN 11
+dataReceived@650-700@scrapy/core/downloader/handlers/http11.py, - coverage 90%, CCN 11
+xmliter_lxml@81-121@scrapy/utils/iterators.py - coverage 95%, CCN 11
+
+get_func_args@215-241@scrapy/utils/python.py - coverage 81%, CCN 11 -- ellen is working on this, coverage now: 94%
+   python3 -m tox  -e py -- tests/test_utils_python.py
+
 
 #### Evaluation
 
