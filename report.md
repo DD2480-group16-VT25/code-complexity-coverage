@@ -167,37 +167,38 @@ Two tests for **get_func_args:**
 
 ```bash
 diff --git a/tests/test_utils_python.py b/tests/test_utils_python.py
-index a693d6b53..848c69ded 100644
+index a693d6b53..c3dd40a27 100644
 --- a/tests/test_utils_python.py
 +++ b/tests/test_utils_python.py
-@@ -5,6 +5,7 @@ import sys
+@@ -2,6 +2,7 @@ import functools
+ import operator
+ import platform
+ import sys
++from unittest.mock import patch
  
  import pytest
  from twisted.trial import unittest
-+from unittest.mock import patch
- 
- from scrapy.utils.asyncgen import as_async_generator, collect_asyncgen
- from scrapy.utils.defer import aiter_errback, deferred_f_from_coro_f
 @@ -231,6 +232,9 @@ class UtilsPythonTestCase(unittest.TestCase):
          self.assertEqual(get_func_args(object), [])
          self.assertEqual(get_func_args(str.split, stripself=True), ["sep", "maxsplit"])
          self.assertEqual(get_func_args(" ".join, stripself=True), ["iterable"])
-+        # The parameter has to be callable, if not, like this 42, it triggers a TypeError,
++        # The parameter has to be callable, if not, like this int, it triggers a TypeError,
 +        # which was not previously reached.
-+        self.assertRaises(TypeError, get_func_args, 42)
++        self.assertRaises(TypeError, get_func_args, 123)
  
          if sys.version_info >= (3, 13) or platform.python_implementation() == "PyPy":
              # the correct and correctly extracted signature
-@@ -245,6 +249,15 @@ class UtilsPythonTestCase(unittest.TestCase):
+@@ -245,6 +249,16 @@ class UtilsPythonTestCase(unittest.TestCase):
                  [[], ["args", "kwargs"]],
              )
  
-+    @patch('inspect.signature', side_effect=ValueError("some error"))
++    @patch("inspect.signature", side_effect=ValueError("some error"))
 +    def test_get_func_args_value_error(self, signature):
 +        # Test that if inspect.signature raises a ValueError, get_func_args returns an empty list.
 +        # This ValueError was not previously reached.
 +        def f4(a, b):
 +            pass
++
 +        # When inspect.signature raises a ValueError, the function should return [] (args).
 +        self.assertEqual(get_func_args(f4), [])
 +
