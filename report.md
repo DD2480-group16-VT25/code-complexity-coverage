@@ -92,6 +92,10 @@ integrate it with your build environment?
 
 ### Your own coverage tool
 
+> The code coverage tool works by manually annotating the code with `track_branch(func_name, branch_id)` calls. The tool then runs the original test suite and collects the coverage data which is then reported in the console.
+
+> The tool can be found in `scrapy/diy_coverage/diycoverage.py`, and the runnable code is under `scrapy/diy_coverage/run_coverage.py`.
+
 Show a patch (or link to a branch) that shows the instrumented code to
 gather coverage measurements.
 
@@ -100,16 +104,19 @@ the git command that is used to obtain the patch instead:
 
 git diff ...
 
-What kinds of constructs does your tool support, and how accurate is
-its output?
-
 ### Evaluation
 
 1. How detailed is your coverage measurement?
 
+The quality of the coverage measurement seems to be good but since the test environment of the project uses `tox` to download many dependencies, taking several minutes to run, we settled on just running the tests using the Python standard `unittest` module and then accepting that some tests will throw errors due to missing dependencies. This results in the branch coverage being less than 100% for the 3 functions we measured.
+
 2. What are the limitations of your own tool?
 
+The tool does not take into account ternary operators and exceptions.
+
 3. Are the results of your tool consistent with existing coverage tools?
+
+Yes, considering the limitations `unittest` compared to the `tox` test environment.
 
 ## Coverage improvement
 
@@ -119,23 +126,29 @@ Command to get branch coverage using their `tox` tool:
 $env:COV_ARGS="--branch"; tox -e py -- tests
 ```
 
+And to get the report afterwards:
+
+```bash
+coverage html
+```
+
 ###### _process_spider_output
 
 Old coverage: 100%, 24 branches. Higher than rest of code.
 
-New coverage: ...
+New coverage: N/A
 
 ###### _get_inputs
 
 Old coverage: 100%, 6 branches. Higher than rest of code.
 
-New coverage: ...
+New coverage: N/A
 
 ###### _get_serialized_fields
 
 Old coverage: 100%, 16 branches. Higher than rest of code.
 
-New coverage: ...
+New coverage: N/A
 
 ### Functions to improve coverage
 
@@ -159,7 +172,7 @@ xmliter_lxml@81-121@scrapy/utils/iterators.py - coverage 95%, CCN 11
 
 Show the comments that describe the requirements for the coverage.
 
-Report of old coverage: [link]
+Report of old coverage: [htmlcov/index.html](htmlcov/index.html) (open in browser for intractive report)
 
 Report of new coverage: [link]
 
@@ -169,7 +182,7 @@ git diff ...
 
 Two tests for **get_func_args:**
 
-```
+```bash
 diff --git a/tests/test_utils_python.py b/tests/test_utils_python.py
 index a693d6b53..848c69ded 100644
 --- a/tests/test_utils_python.py
