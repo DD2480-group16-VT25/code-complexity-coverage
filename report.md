@@ -137,15 +137,22 @@ Old coverage: 100%, 16 branches. Higher than rest of code.
 
 New coverage: ...
 
+### Functions to improve coverage
+
+Since the three functions with the highest CCN all had 100% coverage, we chose three new functions to improve coverage on. 
+
+###### get_func_args
+
+Old coverage: 81%, 12 branches.
+
+New coverage: 94%
+
 _next_request@167-207@scrapy/core/engine.py - coverage 94%, CCN 13
 run@70-110@scrapy/commands/check.py - coverage 96%, CCN 13
 _parse_sitemap@69-95@scrapy/spiders/sitemap.py - coverage 82%, CCN 12
 _cb_bodyready@465-552@scrapy/core/downloader/handlers/http11.py - coverage 94%, CCN 11
 dataReceived@650-700@scrapy/core/downloader/handlers/http11.py, - coverage 90%, CCN 11
 xmliter_lxml@81-121@scrapy/utils/iterators.py - coverage 95%, CCN 11
-
-get_func_args@215-241@scrapy/utils/python.py - coverage 81%, CCN 11 -- ellen is working on this, coverage now: 94%
-   python3 -m tox  -e py -- tests/test_utils_python.py
 
 
 #### Evaluation
@@ -159,6 +166,49 @@ Report of new coverage: [link]
 Test cases added:
 
 git diff ...
+
+Two tests for **get_func_args:**
+
+```
+diff --git a/tests/test_utils_python.py b/tests/test_utils_python.py
+index a693d6b53..848c69ded 100644
+--- a/tests/test_utils_python.py
++++ b/tests/test_utils_python.py
+@@ -5,6 +5,7 @@ import sys
+ 
+ import pytest
+ from twisted.trial import unittest
++from unittest.mock import patch
+ 
+ from scrapy.utils.asyncgen import as_async_generator, collect_asyncgen
+ from scrapy.utils.defer import aiter_errback, deferred_f_from_coro_f
+@@ -231,6 +232,9 @@ class UtilsPythonTestCase(unittest.TestCase):
+         self.assertEqual(get_func_args(object), [])
+         self.assertEqual(get_func_args(str.split, stripself=True), ["sep", "maxsplit"])
+         self.assertEqual(get_func_args(" ".join, stripself=True), ["iterable"])
++        # The parameter has to be callable, if not, like this 42, it triggers a TypeError,
++        # which was not previously reached.
++        self.assertRaises(TypeError, get_func_args, 42)
+ 
+         if sys.version_info >= (3, 13) or platform.python_implementation() == "PyPy":
+             # the correct and correctly extracted signature
+@@ -245,6 +249,15 @@ class UtilsPythonTestCase(unittest.TestCase):
+                 [[], ["args", "kwargs"]],
+             )
+ 
++    @patch('inspect.signature', side_effect=ValueError("some error"))
++    def test_get_func_args_value_error(self, signature):
++        # Test that if inspect.signature raises a ValueError, get_func_args returns an empty list.
++        # This ValueError was not previously reached.
++        def f4(a, b):
++            pass
++        # When inspect.signature raises a ValueError, the function should return [] (args).
++        self.assertEqual(get_func_args(f4), [])
++
+     def test_without_none_values(self):
+         self.assertEqual(without_none_values([1, None, 3, 4]), [1, 3, 4])
+         self.assertEqual(without_none_values((1, None, 3, 4)), (1, 3, 4))
+```
 
 Number of test cases added: two per team member (P) or at least four (P+).
 
