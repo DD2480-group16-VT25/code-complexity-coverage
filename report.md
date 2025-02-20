@@ -68,10 +68,10 @@ git diff ...
 
 ### Tools
 
-Document your experience in using a "new"/different coverage tool.
+**Document your experience in using a "new"/different coverage tool.** To measure coverage we used the `coverage` tool. We ran the tests using the `tox` tool and then ran the coverage tool to get the coverage report. The coverage tool was easy to use and the report was very easy to understand.
 
-How well was the tool documented? Was it possible/easy/difficult to
-integrate it with your build environment?
+**How well was the tool documented? Was it possible/easy/difficult to
+integrate it with your build environment?** It was very easy to integrate the coverage tool with the build environment since it seems to use the last test result by `tox` by default. The tool was well documented.
 
 ### Your own coverage tool
 
@@ -79,8 +79,7 @@ integrate it with your build environment?
 
 > The tool can be found in `scrapy/diy_coverage/diycoverage.py`, and the runnable code is under `scrapy/diy_coverage/run_coverage.py`.
 
-Show a patch (or link to a branch) that shows the instrumented code to
-gather coverage measurements.
+**Show a patch (or link to a branch) that shows the instrumented code to gather coverage measurements.**  See the commit history of the `dev-DIY-coverage` on the forked repository. https://github.com/DD2480-group16-VT25/scrapy/tree/dev-DIY-coverage.
 
 The patch is probably too long to be copied here, so please add
 the git command that is used to obtain the patch instead:
@@ -135,7 +134,7 @@ New coverage: N/A
 
 ### Functions to improve coverage
 
-Since the three functions with the highest CCN all had 100% coverage, we chose three new functions to improve coverage on. 
+Since the three functions with the highest CCN all had 100% coverage, we chose new functions to improve coverage on. 
 
 ###### get_func_args
 
@@ -147,9 +146,19 @@ _next_request@167-207@scrapy/core/engine.py - coverage 94%, CCN 13
 run@70-110@scrapy/commands/check.py - coverage 96%, CCN 13
 _parse_sitemap@69-95@scrapy/spiders/sitemap.py - coverage 82%, CCN 12
 _cb_bodyready@465-552@scrapy/core/downloader/handlers/http11.py - coverage 94%, CCN 11
-dataReceived@650-700@scrapy/core/downloader/handlers/http11.py, - coverage 90%, CCN 11
 xmliter_lxml@81-121@scrapy/utils/iterators.py - coverage 95%, CCN 11
 
+###### dataReceived (scrapy/core/downloader/handlers/http11.py)
+
+Old coverage: 90%, 10 branches.
+
+New coverage: 100%.
+
+###### run (scrapy\commands\settings.py)
+
+Old coverage: 63%, 12 branches.
+
+New coverage: 70%.
 
 #### Evaluation
 
