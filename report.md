@@ -29,19 +29,9 @@ Currently chosen project.
 1. What are your results for five **(three)** complex functions?
    * Did all methods (tools vs. manual count) get the same result?
    * Are the results clear?
-
-
-      * **_process_spider_output@186-273@scrapy/core/spidermw.py**
-
-         Lizard gave the CCN of 18, we counted by hand and got 18 as well.
-
-      * **_get_inputs@159-195@scrapy/http/request/form.py**
-
-         Lizard gave the CCN of 16, we counted by hand and got 15.
-
-      *  **_get_serialized_fields@72-108@scrapy/exporters.py**
-
-         Lizard give the CCN of 14, we counted by hand and got 16.
+      * **_process_spider_output@186-273@scrapy/core/spidermw.py:** lizard gave the CCN of 18, we counted by hand and got 18 as well.
+      * **_get_inputs@159-195@scrapy/http/request/form.py:** lizard gave the CCN of 16, we counted by hand and got 15.
+      *  **_get_serialized_fields@72-108@scrapy/exporters.py:** lizard give the CCN of 14, we counted by hand and got 16.
 
       We don't think the results are very clear, we also found it quite confusing counting some of the functions.
    
@@ -65,17 +55,10 @@ Currently chosen project.
 
 ## Refactoring
 
-Plan for refactoring complex code:
-  * **_process_spider_output:** This Method could be refactored in order to reduce its CC and improve readability. For example the logic for chosing the method and determining if an upgrade or downgrade is needed could be moved to a separate method. This would reduce the CC of the Method by 4 and and would also make the methods more manageble. 
-
-   * **_get_serialized_fields:** By moving the logic for retriving the field iterator to a new method. The CC of this Method could be reduced by 4.
-
-   * **_get_inputs:** For this method the logic for extracting values from the inputs could be moved to a new method which would reduce the CC of the _get_inputs method by 3.
-
-
-
-
-Estimated impact of refactoring (lower CC, but other drawbacks?).
+Plan for refactoring complex code and the estimated impact:
+   * **_process_spider_output:** this function could be refactored in order to reduce its CC and improve readability. For example the logic for choosing the method and determining if an upgrade or downgrade is needed could be moved to a separate method. This would reduce the CC of the function by 4 and and would also make the function more manageble. 
+   * **_get_serialized_fields:** by moving the logic for retriving the field iterator to a new method, the CC of this function could be reduced by 5.
+   * **_get_inputs:** for this function, the logic for extracting values from the inputs could be moved to a new method which would reduce the CC by 5.
 
 Carried out refactoring (optional, P+):
 
