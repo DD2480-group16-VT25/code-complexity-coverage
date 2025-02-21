@@ -150,9 +150,9 @@ New coverage: 100%.
 
 ###### run (scrapy\commands\settings.py)
 
-Old coverage: 63%, 12 branches.
+Old coverage: 37%, 12 branches.
 
-New coverage: 70%.
+New coverage: 74%.
 
 ###### _parse_sitemap (scrapy\spiders\sitemap.py)
 
