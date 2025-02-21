@@ -10,18 +10,13 @@ Scrapy is a BSD-licensed fast high-level web crawling and web scraping framework
 
 ## Onboarding experience
 
-Did it build and run as documented?
-    
-See the assignment for details; if everything works out of the box,
-there is no need to write much here. If the first project(s) you picked ended up being unsuitable, you can describe the "onboarding experience" for each project, along with reason(s) why you changed to a different one.
-
 #### Teammates (https://github.com/TEAMMATES/teammates)
 
 Our first project ended up having very little java-backend code we could find tests for. And we figured it would be hard to work with such a frontend-heavy project. So we switched project.
 
 #### Scrapy (https://github.com/scrapy/scrapy)
 
-Currently chosen project.
+This project was easy to set up, the only tool we needed to install was tox for testing.
 
 
 ## Complexity
@@ -60,9 +55,9 @@ Plan for refactoring complex code and the estimated impact:
    * **_get_serialized_fields:** by moving the logic for retriving the field iterator to a new method, the CC of this function could be reduced by 5.
    * **_get_inputs:** for this function, the logic for extracting values from the inputs could be moved to a new method which would reduce the CC by 5.
 
-Carried out refactoring (optional, P+):
+<!-- Carried out refactoring (optional, P+):
 
-git diff ...
+git diff ... -->
 
 ## Coverage
 
@@ -70,35 +65,34 @@ git diff ...
 
 **Document your experience in using a "new"/different coverage tool.** To measure coverage we used the `coverage` tool. We ran the tests using the `tox` tool and then ran the coverage tool to get the coverage report. The coverage tool was easy to use and the report was very easy to understand.
 
-**How well was the tool documented? Was it possible/easy/difficult to
-integrate it with your build environment?** It was very easy to integrate the coverage tool with the build environment since it seems to use the last test result by `tox` by default. The tool was well documented.
+**How well was the tool documented? Was it possible/easy/difficult to integrate it with your build environment?** It was very easy to integrate the coverage tool with the build environment since it seems to use the last test result by `tox` by default. The tool was well documented.
 
 ### Your own coverage tool
 
-> The code coverage tool works by manually annotating the code with `track_branch(func_name, branch_id)` calls. The tool then runs the original test suite and collects the coverage data which is then reported in the console.
+> The DIY branch coverage tool works by manually annotating the code with `track_branch(func_name, branch_id)` calls. The tool then runs the original test suite and collects the coverage data which is then reported in the console.
 
 > The tool can be found in `scrapy/diy_coverage/diycoverage.py`, and the runnable code is under `scrapy/diy_coverage/run_coverage.py`.
 
-**Show a patch (or link to a branch) that shows the instrumented code to gather coverage measurements.**  See the commit history of the `dev-DIY-coverage` on the forked repository. https://github.com/DD2480-group16-VT25/scrapy/tree/dev-DIY-coverage.
+**Show a patch (or link to a branch) that shows the instrumented code to gather coverage measurements.**  See the commit history of the `dev-DIY-coverage` branch on the forked repository. https://github.com/DD2480-group16-VT25/scrapy/tree/dev-DIY-coverage.
 
-The patch is probably too long to be copied here, so please add
+<!-- The patch is probably too long to be copied here, so please add
 the git command that is used to obtain the patch instead:
 
-git diff ...
+git diff ... -->
 
 ### Evaluation
 
 1. How detailed is your coverage measurement?
 
-The quality of the coverage measurement seems to be good but since the test environment of the project uses `tox` to download many dependencies, taking several minutes to run, we settled on just running the tests using the Python standard `unittest` module and then accepting that some tests will throw errors due to missing dependencies. This results in the branch coverage being less than 100% for the 3 functions we measured.
+The quality of the coverage measurement seems to be good but since the test environment of the project uses `tox` to download many dependencies, taking ~15 minutes to run, we settled on just running the tests using the Python standard `unittest` module and then accepting that some tests will throw errors due to missing dependencies. This results in the branch coverage being less than 100% for the 3 functions we measured.
 
 2. What are the limitations of your own tool?
 
-The tool does not take into account ternary operators and exceptions.
+The tool cannot be used on ternary operators unless you manually expand them into if-else statements.
 
 3. Are the results of your tool consistent with existing coverage tools?
 
-Yes, considering the limitations `unittest` compared to the `tox` test environment.
+Yes, considering the limitations of `unittest` compared to the `tox` test environment.
 
 ## Coverage improvement
 
@@ -106,6 +100,12 @@ Command to get branch coverage using their `tox` tool:
 
 ```bash
 $env:COV_ARGS="--branch"; tox -e py -- tests
+```
+
+or 
+
+```bash
+python3 -m tox -e py -- tests
 ```
 
 And to get the report afterwards:
@@ -136,17 +136,11 @@ New coverage: N/A
 
 Since the three functions with the highest CCN all had 100% coverage, we chose new functions to improve coverage on. 
 
-###### get_func_args
+###### get_func_args (scrapy/scrapy/utils/python.py)
 
 Old coverage: 81%, 12 branches.
 
 New coverage: 94%
-
-_next_request@167-207@scrapy/core/engine.py - coverage 94%, CCN 13
-run@70-110@scrapy/commands/check.py - coverage 96%, CCN 13
-_parse_sitemap@69-95@scrapy/spiders/sitemap.py - coverage 82%, CCN 12
-_cb_bodyready@465-552@scrapy/core/downloader/handlers/http11.py - coverage 94%, CCN 11
-xmliter_lxml@81-121@scrapy/utils/iterators.py - coverage 95%, CCN 11
 
 ###### dataReceived (scrapy/core/downloader/handlers/http11.py)
 
@@ -174,7 +168,7 @@ git diff ...
 
 Two tests for **get_func_args:**
 
-```bash
+```diff
 diff --git a/tests/test_utils_python.py b/tests/test_utils_python.py
 index a693d6b53..c3dd40a27 100644
 --- a/tests/test_utils_python.py
@@ -216,20 +210,98 @@ index a693d6b53..c3dd40a27 100644
          self.assertEqual(without_none_values((1, None, 3, 4)), (1, 3, 4))
 ```
 
-Number of test cases added: two per team member (P) or at least four (P+).
+One test for **dataReceived:**
+
+```diff
+diff --git a/tests/test_downloader_handlers.py b/tests/test_downloader_handlers.py
+index 323a51002..61f4b6fd1 100644
+--- a/tests/test_downloader_handlers.py
++++ b/tests/test_downloader_handlers.py
+@@ -506,6 +506,39 @@ class Http11TestCase(HttpTestCase):
++    @defer.inlineCallbacks
++    def test_download_with_maxsize_very_large_file_should_warn(self):
++        """Test that a warning is logged when the download warn size is exceeded. Also test that the
++        download is aborted when the download max size is exceeded.
++        Inspired by test_download_with_maxsize_very_large_file.
++        """
++        with mock.patch("scrapy.core.downloader.handlers.http11.logger") as logger:
++            request = Request(self.getURL("largechunkedfile"))
++            # Set Spider warnsize to trigger warning
++            d = self.download_request(request, Spider("foo", download_maxsize=1500, download_warnsize=1000))
++            yield self.assertFailure(d, defer.CancelledError, error.ConnectionAborted)
++
++            def check(logger):
++                # Check for both warning messages
++                logger.warning.assert_has_calls(
++                    [
++                        mock.call(
++                            "Received more bytes than download warn size (%(warnsize)s) in request %(request)s.",
++                            {"warnsize": 1000, "request": request},
++                        ),
++                        mock.call(mock.ANY, mock.ANY),  # The maxsize warning message
++                    ],
++                    any_order=True,
++                )
++
++            # As the error message is logged in the dataReceived callback, we
++            # have to give a bit of time to the reactor to process the queue
++            # after closing the connection.
++            d = defer.Deferred()
++            d.addCallback(check)
++            reactor.callLater(0.1, d.callback, logger)
++            yield d
+```
+
+One test for **run:**
+
+```diff
+diff --git a/tests/test_commands.py b/tests/test_commands.py
+index 1a0db1e03..1187a6d27 100644
+--- a/tests/test_commands.py
++++ b/tests/test_commands.py
+@@ -25,6 +25,7 @@ from twisted.trial import unittest
+ import scrapy
+ from scrapy.cmdline import _pop_command_name, _print_unknown_command_msg
+ from scrapy.commands import ScrapyCommand, ScrapyHelpFormatter, view
++from scrapy.commands.settings import Command
+ from scrapy.commands.startproject import IGNORE
+ from scrapy.settings import Settings
+ from scrapy.utils.python import to_unicode
+@@ -55,6 +56,22 @@ class CommandSettings(unittest.TestCase):
+         )
+         self.assertEqual(dict(self.command.settings["FEEDS"]), json.loads(feeds_json))
+
++    def test_settings_getlist(self):
++        command = Command()
++        command.settings = Settings()
++        command.crawler_process = mock.Mock()
++        command.crawler_process.settings = Settings()
++        command.crawler_process.settings.set('TEST_LIST', ['a', 'b', 'c'])
++
++        parser = argparse.ArgumentParser()
++        command.add_options(parser)
++
++        args = parser.parse_args(['--getlist', 'TEST_LIST'])
++
++        with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
++            command.run([], args)
++            self.assertEqual(mock_stdout.getvalue().strip(), "['a', 'b', 'c']")
+```
+
+<!-- Number of test cases added: two per team member (P) or at least four (P+). -->
 
 ## Self-assessment: Way of working
 
-Current state according to the Essence standard: ...
+**Current state according to the Essence standard:** Working Well
 
-Was the self-assessment unanimous? Any doubts about certain items?
+**Was the self-assessment unanimous? Any doubts about certain items?** It was unanimous.
 
-How have you improved so far?
+**How have you improved so far?** We use GitHub tools more naturally, e.g. creating issues and reviewing other's pull requests.
 
-Where is potential for improvement?
+**Where is potential for improvement?** We could be more effective when working individually, we also tend to have long meetings where we work, which could be made individually.
 
 ## Overall experience
 
-What are your main take-aways from this project? What did you learn?
+**What are your main take-aways from this project? What did you learn?** Branch coverage and code coverage is not the same, it also reminded us that sometimes it's better to split up long and/or complex functions.
 
-Is there something special you want to mention here?
+**Is there something special you want to mention here?**
