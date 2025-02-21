@@ -154,6 +154,18 @@ Old coverage: 63%, 12 branches.
 
 New coverage: 70%.
 
+###### _parse_sitemap (scrapy\spiders\sitemap.py)
+
+Old coverage: 82%, 12 branches.
+
+New coverage 90%.
+
+###### _cb_bodyready (scrapy\core\downloader\handlers\http11.py)
+
+Old coverage: 94%, 10 branches.
+
+New coverage 100%.
+
 #### Evaluation
 
 Show the comments that describe the requirements for the coverage.
@@ -286,6 +298,113 @@ index 1a0db1e03..1187a6d27 100644
 +        with mock.patch('sys.stdout', new=StringIO()) as mock_stdout:
 +            command.run([], args)
 +            self.assertEqual(mock_stdout.getvalue().strip(), "['a', 'b', 'c']")
+```
+
+One test for **_parse_sitemap:**
+
+```diff
+diff --git a/tests/test_spider.py b/tests/test_spider.py
+index 18a863350..4de72e5bf 100644
+--- a/tests/test_spider.py
++++ b/tests/test_spider.py
+@@ -809,6 +809,23 @@ Sitemap: /sitemap-relative-url.xml
+             ),
+         )
+
++    def test_parse_sitemap_body_none(self):
++        # Test that a warning is logged when the sitemap body is None
++        spider = self.spider_class(name="example.com")
++        response = Response(url="http://example.com/sitemap.xml")
++
++        with mock.patch.object(spider, "_get_sitemap_body", return_value=None):
++            with LogCapture() as lc:
++                result = list(spider._parse_sitemap(response))
++                self.assertEqual(result, [])
++                lc.check(
++                    (
++                        "scrapy.spiders.sitemap",
++                        "WARNING",
++                        "Ignoring invalid sitemap: <200 http://example.com/sitemap.xml>",
++                    )
++                )
+
+
+class DeprecationTest(unittest.TestCase):
+    def test_crawl_spider(self):
+```
+
+One test for **_cb_bodyready:**
+
+```diff
+diff --git a/tests/test_downloader_handlers.py b/tests/test_downloader_handlers.py
+index 61f4b6fd1..1509d48cc 100644
+--- a/tests/test_downloader_handlers.py
++++ b/tests/test_downloader_handlers.py
+@@ -26,7 +26,7 @@ from scrapy.core.downloader.handlers.datauri import DataURIDownloadHandler
+ from scrapy.core.downloader.handlers.file import FileDownloadHandler
+ from scrapy.core.downloader.handlers.ftp import FTPDownloadHandler
+ from scrapy.core.downloader.handlers.http10 import HTTP10DownloadHandler
+-from scrapy.core.downloader.handlers.http11 import HTTP11DownloadHandler
++from scrapy.core.downloader.handlers.http11 import HTTP11DownloadHandler, ScrapyAgent
+ from scrapy.core.downloader.handlers.s3 import S3DownloadHandler
+ from scrapy.exceptions import NotConfigured
+ from scrapy.http import Headers, HtmlResponse, Request
+@@ -509,13 +509,15 @@ class Http11TestCase(HttpTestCase):
+     @defer.inlineCallbacks
+     def test_download_with_maxsize_very_large_file_should_warn(self):
+         """Test that a warning is logged when the download warn size is exceeded. Also test that the
+-        download is aborted when the download max size is exceeded.
++        download is aborted when the download max size is exceeded.
+         Inspired by test_download_with_maxsize_very_large_file.
+         """
+         with mock.patch("scrapy.core.downloader.handlers.http11.logger") as logger:
+             request = Request(self.getURL("largechunkedfile"))
+             # Set Spider warnsize to trigger warning
+-            d = self.download_request(request, Spider("foo", download_maxsize=1500, download_warnsize=1000))
++            d = self.download_request(
++                request, Spider("foo", download_maxsize=1500, download_warnsize=1000)
++            )
+             yield self.assertFailure(d, defer.CancelledError, error.ConnectionAborted)
+
+             def check(logger):
+@@ -615,6 +617,37 @@ class Http11TestCase(HttpTestCase):
+         d.addCallback(self.assertEqual, "HTTP/1.1")
+         return d
+
++    def test_warnsize_logging(self):
++        # Test that a warning is logged when the response size is larger than the download warn size
++        request = Request(self.getURL("file"))
++        spider = Spider("foo")
++        spider.download_warnsize = 1000  # Set warnsize to 1000 bytes
++
++        agent = ScrapyAgent(
++            contextFactory=None,
++            pool=None,
++            maxsize=0,
++            warnsize=spider.download_warnsize,
++            fail_on_dataloss=True,
++            crawler=self.download_handler._crawler,
++        )
++
++        response = mock.Mock()
++        response.length = 2000  # Set response length to 2000 bytes
++        response.headers.getAllRawHeaders.return_value = [
++            (b"Content-Length", [b"2000"])
++        ]
++
++        with LogCapture() as lc:
++            agent._cb_bodyready(response, request)
++            lc.check(
++                (
++                    "scrapy.core.downloader.handlers.http11",
++                    "WARNING",
++                    f"Expected response size (2000) larger than download warn size (1000) in request <GET {request.url}>.", 
++                )
++            )
++
+
+ class Https11TestCase(Http11TestCase):
+     scheme = "https"
 ```
 
 <!-- Number of test cases added: two per team member (P) or at least four (P+). -->
