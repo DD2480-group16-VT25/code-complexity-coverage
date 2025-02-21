@@ -170,9 +170,9 @@ New coverage 100%.
 
 Show the comments that describe the requirements for the coverage.
 
-Report of old coverage: [htmlcov/index.html](htmlcov/index.html) (open in browser for intractive report)
+Report of old coverage: [htmlcov_old/index.html](htmlcov_old/index.html) (open in browser for intractive report)
 
-Report of new coverage: [link]
+Report of new coverage: [htmlcovNEW/index.html](htmlcovNEW/index.html) (open in browser for intractive report)
 
 Test cases added:
 
